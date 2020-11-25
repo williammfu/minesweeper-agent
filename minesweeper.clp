@@ -17,6 +17,12 @@
     (slot y)
 )
 
+(deftemplate closed-around
+    (slot x)
+    (slot y)
+    (slot amount)
+)
+
 (deffunction is-pq-around-xy
     (?p ?q ?x ?y)
     (or
@@ -67,6 +73,8 @@
     (test (> ?bombs 0))
     =>
     ;; TO DO assert here
+    (bind ?count (length$ (find-all-facts ((?g tile)) (in-range ?g:x ?g:y ?g:state (- ?x 1) (+ ?x 1) (- ?y 1) (+ ?y 1)))))
+    (assert (closed-around (x ?x) (y ?y) (amount ?count)))
     (printout t "Amount closed around  (" ?x "," ?y ") = ")
     (printout t (length$ (find-all-facts ((?g tile)) (in-range ?g:x ?g:y ?g:state (- ?x 1) (+ ?x 1) (- ?y 1) (+ ?y 1)))) crlf)
 )
@@ -74,7 +82,8 @@
 ;; [BELUM KELAR]
 ; (defrule create-flag
 ;     ?f <- (tile (x ?x) (y ?y) (bombs ?bombs) (state close))
-;     ;; 1 fakta lagi biar ga di flag semua yang close
+;     (closed-around (x ?x) (y ?x) (amount ?amount))
+;     (test (= ?amount ?))
 ;     =>
 ;     (retract ?f)
 ;     (assert (tile (x ?x) (y ?y) (bombs -1) (state close)))

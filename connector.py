@@ -60,7 +60,7 @@ def current_state(facts):
 if __name__ == "__main__":
 
     env = clips.Environment()
-    env.load('C:\\Users\\ASUS\\Desktop\\sem5\\ai\\tubes\\minesweeper-agent\\minesweeper.clp')
+    env.load('C:\\Users\\Hengky\\Desktop\\minesweeper-agent\\minesweeper.clp')
     env.reset()
 
     size, total, positions = reader.read_board_file('input-mini.txt')
