@@ -56,7 +56,7 @@
 
 ;; Opens all tiles surrounding tile E(x,y) with E(x,y) = 0
 (defrule spread
-    (declare (salience 1))
+    (declare (salience 10))
     (tile (x ?x) (y ?y) (bombs 0) (state open))
     ?f <- (tile (x ?p) (y ?q) (bombs ?value2) (state close)) ;; Yang mau di buka
     (test (is-pq-around-xy ?p ?q ?x ?y))
@@ -69,6 +69,7 @@
 ;; Menghitung tile yang tertutup di sekitar E(x,y)
 ;; Boleh di-assert kalo mau
 (defrule count-closed-around-tile
+     (declare (salience 5))
     (tile (x ?x) (y ?y) (bombs ?bombs) (state open))
     (test (> ?bombs 0))
     =>
@@ -80,14 +81,17 @@
 )
 
 ;; [BELUM KELAR]
-; (defrule create-flag
-;     ?f <- (tile (x ?x) (y ?y) (bombs ?bombs) (state close))
-;     (closed-around (x ?x) (y ?x) (amount ?amount))
-;     (test (= ?amount ?))
-;     =>
-;     (retract ?f)
-;     (assert (tile (x ?x) (y ?y) (bombs -1) (state close)))
-; )
+(defrule create-flag
+    ?t1 <- (tile (x ?x) (y ?y) (bombs ?bombs1) (state open))
+    (closed-around (x ?x) (y ?y) (amount ?amount))
+    (test (= ?amount ?bombs1)) ;; jumlah kosong == jumlah bom (artinya disekitarnya semua bom)
+    ?t2 <- (tile (x ?p) (y ?q) (bombs ?bombs2) (state close))
+    (test (> ?bombs2 -1))
+    (test (in-range ?p ?q close (- ?x 1) (+ ?x 1) (- ?y 1) (+ ?y 1)))
+    =>
+    (retract ?t2)
+    (assert (tile (x ?p) (y ?q) (bombs -1) (state close)))
+)
 
 ; (defrule click-bomb-safe
 ;     ?f <- (tile (x ?x) (y ?y) (bombs ?bombs) (state close))
