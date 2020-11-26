@@ -23,6 +23,11 @@
     (slot amount)
 )
 
+(deftemplate bomb
+    (slot x)
+    (slot y)
+)
+
 (deffunction is-pq-around-xy
     (?p ?q ?x ?y)
     (or
@@ -86,11 +91,9 @@
     (closed-around (x ?x) (y ?y) (amount ?amount))
     (test (= ?amount ?bombs1)) ;; jumlah kosong == jumlah bom (artinya disekitarnya semua bom)
     ?t2 <- (tile (x ?p) (y ?q) (bombs ?bombs2) (state close))
-    (test (> ?bombs2 -1))
     (test (in-range ?p ?q close (- ?x 1) (+ ?x 1) (- ?y 1) (+ ?y 1)))
     =>
-    (retract ?t2)
-    (assert (tile (x ?p) (y ?q) (bombs -1) (state close)))
+    (assert (bomb (x ?p) (y ?q)))
 )
 
 ; (defrule click-bomb-safe
@@ -112,11 +115,3 @@
 ;     (printout t "(" ?x " , "  ?y ") is not safe. Bomb. Duar." crlf)  
 ;     ; (exit)
 ; )
-
-
-
-
-
-
-
-
