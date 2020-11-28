@@ -42,10 +42,16 @@ def current_state(facts):
     for f in env.facts():
         try:
             if f['x'] >= 0:
+                # print(f'({int(f["x1"])},{int(f["y1"])})')
                 if f['state'] == 'open':
                     g[int(f['x'])][int(f['y'])] = int(f['bombs'])
-                else:
+                elif f['state'] == 'close':
+                    # print(f['state'])
                     g[int(f['x'])][int(f['y'])] = -999
+                elif f['state'] == 'flagged':
+                    g[int(f['x'])][int(f['y'])] = -2
+                else:
+                    g[int(f['x'])][int(f['y'])] = 9        
         except Exception as e:
             pass
     
@@ -53,6 +59,8 @@ def current_state(facts):
         for j in range(size):
             if g[i][j] == -999:
                 print('█', end=" ")
+            elif g[i][j] == -2:
+                print('F', end=" ")
             else:
                 print(g[i][j], end=" ")
         print()
@@ -60,32 +68,39 @@ def current_state(facts):
 if __name__ == "__main__":
 
     env = clips.Environment()
-    env.load('C:\\Users\\Hengky\\Desktop\\minesweeper-agent\\minesweeper.clp')
+    env.load('minesweeper.clp')
     env.reset()
 
-    size, total, positions = reader.read_board_file('input-mini.txt')
+    size, total, positions = reader.read_board_file('input.txt')
 
     # Defines the board size and total number of mines
-    board_fact = f'(board {size})'
-    mines_fact = f'(total_mines {total})'
+    poss = list(range(size))
+    pospos = "nil "
+    for i in range(size):
+        pospos += f"{i} "
+    pospos += "nil"
+    
+    board_fact = f'(board (size {size}) (total-mines {total}))'
 
     env.assert_string(board_fact)
-    env.assert_string(mines_fact)
 
     info = define_tiles(size, positions)
     for i in range(size):
         for j in range(size):
             tiles_fact = f'(tile (x {i}) (y {j}) (bombs {info[i][j]}) (state close))'
             env.assert_string(tiles_fact)
+            env.assert_string(f'(flag-around (x {i}) (y {j}) (num 0))')
 
-        ## PRINTS BOARD TO TERMINAL ##
-        #     if (i,j) not in positions:
-        #         print(info[i][j], end=" ")
-        #     else:
-        #         print("X", end=" ")
-        # print()
+        # PRINTS BOARD TO TERMINAL ##
+            if (i,j) not in positions:
+                print(info[i][j], end=" ")
+            else:
+                print("X", end=" ")
+        print()
 
+    # for f in env.facts():
+    #     print(f)
     env.run()
-    for f in env.facts():
-        print(f)
-    current_state(env.facts())
+    
+    f = env.facts()
+    current_state(f)
