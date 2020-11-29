@@ -120,6 +120,7 @@
     ?f <- (tile (x ?p) (y ?q) (bombs ?value2) (state close)) ;; Yang mau di buka
     (test (is-pq-around-xy ?p ?q ?x ?y))
     =>
+    (printout t "Spread Open (" ?p "," ?q ")" crlf)
     (modify ?f (state open))
 ) 
 
@@ -127,12 +128,14 @@
 (defrule count-closed-around-tile
     (declare (salience 1))
     (tile (x ?x) (y ?y) (bombs ?bombs) (state open))
-    (flag-around (x ?x) (y ?y) (num ?num))
+    ?f <- (flag-around (x ?x) (y ?y) (num ?num))
     (test (> ?bombs 0))
     =>
-    ; (printout t "count-closed " ?x " " ?y crlf)
     (bind ?count (length$ (find-all-facts ((?g tile)) (in-range ?g:x ?g:y ?g:state (- ?x 1) (+ ?x 1) (- ?y 1) (+ ?y 1)))))
+    ; (bind ?count-flag (length$ (find-all-facts ((?g tile)) (in-range-flag ?g:x ?g:y ?g:state (- ?x 1) (+ ?x 1) (- ?y 1) (+ ?y 1)))))
+    ; (modify ?f (num ?count-flag))
     (assert (closed-around (x ?x) (y ?y) (amount ?count)))
+    (printout t "count-closed-around-tile (" ?x "," ?y ") = " ?count crlf)
     ; (printout t "Amount closed around (" ?x "," ?y ") = " ?count " flag:" ?num crlf)
 )
 
@@ -152,7 +155,7 @@
 
 ;; Membuka tile E()
 (defrule open-bomb-safe
-    (declare (salience 1))
+    ; (declare (salience -1))
     (tile (x ?x) (y ?y) (bombs ?bombs) (state open))
     ?g <- (tile (x ?x1) (y ?y1) (bombs ?bombs1) (state close))
     ?h <- (closed-around-tile (x ?x) (y ?y) (tile ?x1 ?y1))
@@ -162,6 +165,7 @@
     (test (= ?bombs ?num))
     =>
     (modify ?g (state open))
+    (printout t "Open bomb safe (" ?x1 "," ?y1 ") : Patokan (" ?x "," ?y ")" crlf)
     (bind ?count (length$ (find-all-facts ((?g tile)) (in-range ?g:x ?g:y ?g:state (- ?x1 1) (+ ?x1 1) (- ?y1 1) (+ ?y1 1)))))
     (bind ?count-flag (length$ (find-all-facts ((?g tile)) (in-range-flag ?g:x ?g:y ?g:state (- ?x1 1) (+ ?x1 1) (- ?y1 1) (+ ?y1 1)))))
     (modify ?flag (num ?count-flag))
@@ -185,19 +189,20 @@
     (test (in-range ?p ?q close (- ?x 1) (+ ?x 1) (- ?y 1) (+ ?y 1)))
     (test (> ?total 0)) ;; Pastikan jumlah mines pada board tidak negatif
     =>
-    (printout t "create-flag at (" ?p "," ?q ")" crlf)
+    (printout t "create-flag at (" ?p "," ?q ") by (" ?x "," ?y ")" crlf)
     (modify ?t2 (state flagged))
     (modify ?board (total-mines (- ?total 1))) ;; Jumlah bomb yang belum diketahui berkurang satu
 )
 
 ;; Mengupdate jumlah bomb di sekitar tile E(x1, y1) yang baru saja di flag
 (defrule after-flag
+    (declare (salience 2))
     (tile (x ?x1) (y ?y1) (bombs ?bombs) (state flagged))
     ?f <- (closed-around-tile (x ?x2) (y ?y2) (tile ?x1 ?y1))
     ?g <- (flag-around (x ?x2) (y ?y2) (num ?num))
     ?h <- (closed-around (x ?x2) (y ?y2) (amount ?amount))
     =>
-    ; (printout t "(" ?x1 "," ?y1") (" ?x2 "," ?y2 ") =" ?num crlf)
+    (printout t "Flagged(" ?x1 "," ?y1") --> (" ?x2 "," ?y2 ") Flag=" (+ ?num 1) " Closed around=" (- ?amount 1) crlf)
     (retract ?f)
     (modify ?g (num (+ ?num 1)))
     (modify ?h (amount (- ?amount 1)))
@@ -213,14 +218,14 @@
 )
 
 ;; TARIKKK WES TARIKKK
-(defrule tarikkk
-    ; (declare (salience 4))
+(defrule tarik
+    ; (declare (salience 1))
     (tile (x ?x1) (y ?y1) (bombs ?bombs) (state open))
     ?f <- (closed-around-tile (x ?x2) (y ?y2) (tile ?x1 ?y1))
     ?g <- (closed-around (x ?x2) (y ?y2) (amount ?amount))
     ; (tile (x ?x1) (y ?y1) (state open))
     =>
-    (printout t "Tarik" crlf)
+    (printout t "Tarik (" ?x1 "," ?y1 ") dari (" ?x2 "," ?y2 ")" crlf)
     (modify ?g (amount (- ?amount 1)))
     (retract ?f)
 )
