@@ -128,10 +128,13 @@
 (defrule count-closed-around-tile
     (declare (salience 1))
     (tile (x ?x) (y ?y) (bombs ?bombs) (state open))
-    ?f <- (flag-around (x ?x) (y ?y) (num ?num))
+    ; ?f <- (flag-around (x ?x) (y ?y) (num ?num))
     (test (> ?bombs 0))
     =>
     (bind ?count (length$ (find-all-facts ((?g tile)) (in-range ?g:x ?g:y ?g:state (- ?x 1) (+ ?x 1) (- ?y 1) (+ ?y 1)))))
+    (do-for-all-facts ((?f flag-around)) (and (= ?f:x ?x) (= ?f:y ?y)) 
+        (modify ?f (num (length$ (find-all-facts ((?g tile)) (in-range-flag ?g:x ?g:y ?g:state (- ?x 1) (+ ?x 1) (- ?y 1) (+ ?y 1))))))
+    )
     ; (bind ?count-flag (length$ (find-all-facts ((?g tile)) (in-range-flag ?g:x ?g:y ?g:state (- ?x 1) (+ ?x 1) (- ?y 1) (+ ?y 1)))))
     ; (modify ?f (num ?count-flag))
     (assert (closed-around (x ?x) (y ?y) (amount ?count)))
