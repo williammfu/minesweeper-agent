@@ -71,7 +71,7 @@ if __name__ == "__main__":
     env.load('minesweeper.clp')
     env.reset()
 
-    size, total, positions = reader.read_board_file('input.txt')
+    size, total, positions = reader.read_board_file('input-mini.txt')
 
     # Defines the board size and total number of mines
     poss = list(range(size))
@@ -102,5 +102,9 @@ if __name__ == "__main__":
     #     print(f)
     env.run()
     
+    print("-------------")
+    for f in env.facts():
+        print(f)
+
     f = env.facts()
     current_state(f)
