@@ -71,7 +71,7 @@ if __name__ == "__main__":
     env.load('minesweeper.clp')
     env.reset()
 
-    size, total, positions = reader.read_board_file('tc2.txt')
+    size, total, positions = reader.read_board_file('tc4.txt')
 
     # Defines the board size and total number of mines
     poss = list(range(size))
