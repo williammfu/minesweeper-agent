@@ -1,0 +1,5 @@
+CLOSED = -999
+UNOPENED = 'C'
+
+FLAGGED = -1
+FLAG = 'F'
