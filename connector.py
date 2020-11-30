@@ -11,7 +11,6 @@ import itertools
 
 # Sets the tiles number 
 def define_tiles(size, positions):
-    
     tiles = set(range(size))
     radius = set(range(-1,2)) # {-1, 0, 1}
     
@@ -60,7 +59,8 @@ def current_state(facts):
 if __name__ == "__main__":
 
     env = clips.Environment()
-    env.load('C:\\Users\\Hengky\\Desktop\\minesweeper-agent\\minesweeper.clp')
+    # env.load('C:\\Users\\Hengky\\Desktop\\minesweeper-agent\\minesweeper.clp')
+    env.load('./minesweeper.clp')
     env.reset()
 
     size, total, positions = reader.read_board_file('input-mini.txt')
