@@ -68,21 +68,6 @@
 ;     (tile (x 4) (y 4) (bombs -1) (state close))
 ; )
 
-;; Menguji apakah koordinat (p, q) di sekitar koordinat (x, y)
-(deffunction is-pq-around-xy
-    (?p ?q ?x ?y)
-    (or
-        (and (= ?p ?x) (= ?q (+ ?y 1)))
-        (and (= ?p ?x) (= ?q (- ?y 1)))
-        (and (= ?p (+ ?x 1)) (= ?q (+ ?y 1)))
-        (and (= ?p (+ ?x 1)) (= ?q (- ?y 1))) 
-        (and (= ?p (+ ?x 1)) (= ?q ?y ))
-        (and (= ?p (- ?x 1)) (= ?q (+ ?y 1)))
-        (and (= ?p (- ?x 1)) (= ?q ?y))
-        (and (= ?p (- ?x 1)) (= ?q (- ?y 1))) 
-    )
-)
-
 ;; Mengembalikan true jika E(x,y) berada dalam keadaan tertutup
 ;; dan sesuai dengan range yang ada
 (deffunction in-range
@@ -113,18 +98,18 @@
     (modify ?f (state open))
 )
 
-;; Opens all tiles surrounding tile E(x,y) with E(x,y) = 0
+;; Membuka semua tile yang mengelilingi (x,y) dengan E(x,y) = 0
 (defrule spread
     (declare (salience 10))
     (tile (x ?x) (y ?y) (bombs 0) (state open))
     ?f <- (tile (x ?p) (y ?q) (bombs ?value2) (state close)) ;; Yang mau di buka
-    (test (is-pq-around-xy ?p ?q ?x ?y))
+    (test (in-range ?p ?q close (- ?x 1) (+ ?x 1) (- ?y 1) (+ ?y 1)))
     =>
     (printout t "Spread Open (" ?p "," ?q ")" crlf)
     (modify ?f (state open))
 ) 
 
-;; Menghitung tile yang tertutup di sekitar E(x,y)
+;; Menghitung tile yang tertutup di sekitar (x,y)
 (defrule count-closed-around-tile
     (declare (salience 1))
     (tile (x ?x) (y ?y) (bombs ?bombs) (state open))
@@ -142,7 +127,7 @@
     ; (printout t "Amount closed around (" ?x "," ?y ") = " ?count " flag:" ?num crlf)
 )
 
-;; Menambahkan koordinat tile yang tertutup di sekitar E(x,y)
+;; Menambahkan koordinat tile yang tertutup di sekitar (x,y)
 (defrule set-closed-around-tile
     (declare (salience 1))
     (tile (x ?x) (y ?y) (bombs ?bombs1) (state open))
@@ -150,16 +135,15 @@
     (closed-around (x ?x) (y ?y) (amount ?amount))
     (test (> ?amount 0))
     (test (> ?bombs1 0))
-    (test (is-pq-around-xy ?p ?q ?x ?y))
+    (test (in-range ?p ?q close (- ?x 1) (+ ?x 1) (- ?y 1) (+ ?y 1)))
     =>
     ; (printout t "closed-around-tile (" ?x "," ?y ") (tile " ?p " " ?q ")" crlf)
     (assert (closed-around-tile (x ?x) (y ?y) (tile ?p ?q)))
 )
 
-;; Membuka tile E()
+;; Membuka tile (x,y) jika dinilai sudah aman
 (defrule open-bomb-safe
-    ; (declare (salience -1))
-    (tile (x ?x) (y ?y) (bombs ?bombs) (state open))
+    (tile (x ?x) (y ?y) (bombs ?bombs) (state open)) 
     ?g <- (tile (x ?x1) (y ?y1) (bombs ?bombs1) (state close))
     ?h <- (closed-around-tile (x ?x) (y ?y) (tile ?x1 ?y1))
     (flag-around (x ?x) (y ?y) (num ?num))
@@ -178,7 +162,7 @@
     ; (printout t ?num crlf)
 )
 
-;; Membuat flag pada E(p,q)
+;; Membuat flag pada (p,q)
 (defrule create-flag
     (declare (salience -1))
     
@@ -197,7 +181,7 @@
     (modify ?board (total-mines (- ?total 1))) ;; Jumlah bomb yang belum diketahui berkurang satu
 )
 
-;; Mengupdate jumlah bomb di sekitar tile E(x1, y1) yang baru saja di flag
+;; Mengupdate jumlah bomb di sekitar tile (x1, y1) yang baru saja di flag
 (defrule after-flag
     (declare (salience 2))
     (tile (x ?x1) (y ?y1) (bombs ?bombs) (state flagged))
@@ -220,8 +204,9 @@
     (printout t "Flagged(" ?x "," ?y ")" crlf)
 )
 
-;; TARIKKK WES TARIKKK
-(defrule tarik
+;; Updating closed-around value around tile E(x1, y1)
+;; which have just opened
+(defrule retract-closed-around
     ; (declare (salience 1))
     (tile (x ?x1) (y ?y1) (bombs ?bombs) (state open))
     ?f <- (closed-around-tile (x ?x2) (y ?y2) (tile ?x1 ?y1))
