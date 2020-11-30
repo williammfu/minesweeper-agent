@@ -30,7 +30,10 @@ b. Input from Command Prompt
 ## Input
 The input contains this following information, i.e. the board's size, the number of mines, and the locations of the mines.
 
-### Example
+### Example Input from file
+see example at `/assets/tc` directory
+
+### Example Input from Command Prompt
 5 // board's size
 
 2 // number of mines
@@ -39,3 +42,14 @@ The input contains this following information, i.e. the board's size, the number
 2, 3 // location of mines
 
 4, 4 // location of mines
+
+## Screenshots
+
+### Initial Button Clicked
+![](assets/screenshots/initial.jpg)
+
+### Next/Previous button Clicked
+![](assets/screenshots/next-prev.jpg)
+
+### Final Button Clicked
+![](assets/screenshots/final.jpg)
